@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#13141E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grove">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Grove</title>
+<style>
+:root{
+  --bg:#13141E; --surface:#1E2030; --raised:#282B3D; --line:#363A50;
+  --text:#F1EFEA; --sub:#A7A9BD; --faint:#717488;
+  --sage:#4FD1A1; --amber:#FBB845; --rose:#FF8FB0; --indigo:#8C9EFF; --sky:#56C8E8; --lilac:#C89BFF; --danger:#FF7E66;
+}
+*{-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.wrap{max-width:460px;margin:0 auto;padding:20px 16px calc(98px + env(safe-area-inset-bottom));}
+.hd{margin-bottom:18px}
+.statshd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.h1{font-size:26px;font-weight:600;letter-spacing:-.5px}
+.h2{font-size:20px;font-weight:600}
+.subc{color:var(--sub)} .faintc{color:var(--faint)} .sagec{color:var(--sage)}
+.amberc{color:var(--amber)} .indigoc{color:var(--indigo)}
+.sm{font-size:14px} .xs{font-size:11px} .mt2{margin-top:2px} .mt4{margin-top:4px}
+.mt8{margin-top:8px} .mb12{margin-bottom:12px} .nm{margin-top:2px} .nomb{margin-bottom:0}
+.eyebrow{color:var(--faint);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 2px 10px}
+.stack{display:grid;gap:12px;margin-bottom:22px}
+.stacksm{display:grid;gap:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:22px}
+.stack .card,.stacksm .card{margin-bottom:0}
+.card.pad12{padding:12px}
+.itemhead{display:flex;justify-content:space-between;align-items:center}
+.itemname{font-size:16px;font-weight:500}
+.pips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pip{width:14px;height:14px;border-radius:99px;border:1.5px solid var(--sage);background:transparent}
+.bar{height:8px;border-radius:99px;background:var(--raised);margin-top:12px;overflow:hidden}
+.barfill{height:100%;border-radius:99px;transition:width .3s}
+.ctrls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--raised);border:1px solid var(--line);color:var(--text);border-radius:12px;
+  padding:9px 12px;font-size:14px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn svg{display:block}
+.btn.solid{background:var(--sage);color:#0F2018;border:none}
+.btn.quiet{background:transparent;color:var(--sub)}
+.btn.danger{background:var(--danger);color:#2A130D;border:none}
+.btn.danger-outline{background:transparent;color:var(--danger);border-color:var(--danger)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--raised);border:1px solid var(--line);
+  border-radius:99px;padding:3px 8px;color:var(--sub);font-family:ui-monospace,Menlo,monospace;font-size:11px;cursor:pointer}
+.hint{color:var(--faint);font-size:12px;margin-top:10px;line-height:1.45}
+.link{color:var(--sage);cursor:pointer}
+.introw{display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer}
+.introw2{display:flex;align-items:center;gap:10px;padding:2px 0}
+.grow{flex:1}
+.cbox{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line);display:grid;place-items:center;flex:none;cursor:pointer}
+.cbox.sm{width:18px;height:18px;border-radius:5px}
+.cbox.on{background:var(--sage);border-color:var(--sage);color:#0F2018}
+.done{color:var(--faint);text-decoration:line-through}
+.pts{margin-left:auto}
+.tagmini{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+.inrow{display:flex;gap:8px;align-items:center}
+.input{flex:1;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
+  color:var(--text);font-family:inherit;font-size:14px;outline:none}
+.input.full{width:100%;flex:none;box-sizing:border-box}
+.ta{width:100%;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
+  color:var(--text);font-family:inherit;font-size:14px;outline:none;resize:vertical;box-sizing:border-box}
+.naprow{display:flex;justify-content:space-between;align-items:center}
+.daynav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.daylbl{text-align:center;font-size:15px}
+.iconbtn{background:var(--raised);border:1px solid var(--line);border-radius:10px;color:var(--text);cursor:pointer;
+  padding:8px;display:inline-flex;align-items:center}
+.seg{display:flex;gap:6px;margin-bottom:10px}
+.segbtn{flex:1;padding:7px 0;border-radius:10px;font-size:13px;font-family:inherit;cursor:pointer;
+  background:transparent;color:var(--faint);border:1px solid transparent}
+.segbtn.on{background:var(--raised);color:var(--text);border-color:var(--line)}
+.stepper{display:flex;align-items:center;gap:4px;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:0 8px}
+.stepper button{background:none;border:none;color:var(--sub);cursor:pointer;font-size:18px;line-height:1;padding:6px 2px;font-family:ui-monospace,Menlo,monospace}
+.stepper .mono{min-width:26px;text-align:center;font-size:13px}
+.enrow{display:flex;gap:10px}
+.enbtn{flex:1;height:42px;border-radius:12px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+  border:1px solid var(--line);background:transparent;color:var(--faint)}
+.enbtn.on{border-color:var(--indigo);background:var(--indigo);color:#15182A}
+.enlbl{display:flex;justify-content:space-between;color:var(--faint);font-size:11px;margin-top:6px}
+.forest{background:linear-gradient(180deg,#243150,#1E2030);border-radius:14px;border:1px solid var(--line);padding:18px 12px 12px}
+.forestrow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 7px}
+.chart{width:100%;height:auto;display:block}
+.actrow{display:flex;align-items:center;gap:10px}
+.adot{width:8px;height:8px;border-radius:99px;flex:none}
+.streakw{width:64px;text-align:right;font-size:12px}
+.pointshd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.big{font-size:22px}
+.itemedit{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.sel{background:var(--raised);border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:inherit;font-size:13px;padding:7px 8px;outline:none}
+.acc{display:flex;gap:4px}
+.accbtn{width:20px;height:20px;border-radius:99px;border:2px solid transparent;cursor:pointer;padding:0}
+.accbtn.on{border-color:var(--text)}
+.nameinput{background:transparent;border:none;color:var(--text);font-family:inherit;font-size:15px;outline:none}
+.lim{min-width:34px;text-align:center;font-size:13px}
+.footer{text-align:center;color:var(--faint);font-size:11px;margin-top:22px}
+#nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:8px 0 calc(10px + env(safe-area-inset-bottom));z-index:20}
+.navbtn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--faint);font-family:inherit;font-size:10px}
+.navbtn.active{color:var(--sage)}
+#timerbar{position:fixed;left:0;right:0;bottom:calc(74px + env(safe-area-inset-bottom));display:none;justify-content:center;pointer-events:none;z-index:25}
+.timercard{pointer-events:auto;background:var(--raised);border:1px solid var(--line);border-radius:14px;
+  padding:8px 12px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.tdot{width:10px;height:10px;border-radius:99px}
+.tname{font-size:13px;color:var(--sub)}
+.tclock{font-family:ui-monospace,Menlo,monospace;font-size:18px}
+.ticon{background:none;border:none;color:var(--sage);cursor:pointer;display:flex;padding:0}
+.ticon.faint{color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="timerbar"></div>
+<nav id="nav"></nav>
+<script>
+"use strict";
+
+/* ---------- helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, "0");
+const dstr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => dstr(new Date());
+const addDays = (s, n) => { const [y,m,da]=s.split("-").map(Number); const d=new Date(y,m-1,da); d.setDate(d.getDate()+n); return dstr(d); };
+const prettyDay = (s) => { const [y,m,da]=s.split("-").map(Number); return new Date(y,m-1,da).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"}); };
+const uid = () => Math.random().toString(36).slice(2,9);
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const esc = (s) => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const ACC = { sage:"#4FD1A1", indigo:"#8C9EFF", amber:"#FBB845", rose:"#FF8FB0", sky:"#56C8E8", lilac:"#C89BFF" };
+const accOf = (a) => ACC[a] || ACC.sage;
+
+/* ---------- icons ---------- */
+function icon(name, sz=18){
+  const p = {
+    home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+    cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M9 14l2 2 4-4"/>',
+    book:'<path d="M4 4h13a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M14 4v14"/>',
+    chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    check:'<path d="M5 12l5 5 9-10"/>',
+    x:'<path d="M6 6l12 12M18 6L6 18"/>',
+    play:'<path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/>',
+    trash:'<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
+    chevL:'<path d="M15 5l-7 7 7 7"/>',
+    chevR:'<path d="M9 5l7 7-7 7"/>',
+    coffee:'<path d="M4 9h13v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/>',
+    download:'<path d="M12 4v11M7 11l5 5 5-5"/><path d="M5 20h14"/>',
+  }[name] || "";
+  return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+
+/* ---------- state ---------- */
+const KEY = "grove_v1";
+const DEFAULT_MENU = [
+  { id:"reading", name:"Reading", type:"minutes", limit:60, session:null, accent:"sage" },
+  { id:"piano", name:"Piano", type:"times", limit:2, session:15, accent:"indigo" },
+  { id:"klaus", name:"Klaus training", type:"times", limit:2, session:null, accent:"sky" },
+  { id:"reddit", name:"Reddit / phone", type:"minutes", limit:30, session:30, accent:"amber" },
+];
+const BLANK = { menu:DEFAULT_MENU, logs:[], intentions:{}, inbox:[], journal:{}, naps:[] };
+function load(){ try{ const r=localStorage.getItem(KEY); if(r) return Object.assign(clone(BLANK), JSON.parse(r)); }catch(e){} return clone(BLANK); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+let state = load();
+
+const now = new Date();
+const ui = { tab:"today", planDay:addDays(today(),1), planLane:"forSure", planPoints:1,
+  captureText:"", planText:"", statsY:now.getFullYear(), statsM:now.getMonth(), timer:null, _tick:null, confirmReset:false };
+
+/* ---------- logging ---------- */
+const todaysFor = (id) => state.logs.filter(l => l.itemId===id && l.date===today());
+const usedToday = (it) => it.type==="times" ? todaysFor(it.id).length : todaysFor(it.id).reduce((a,l)=>a+(l.minutes||0),0);
+
+/* ---------- forest + charts ---------- */
+const stageOf = (sc) => sc===0?0 : sc<=2?1 : sc<=4?2 : sc<=7?3 : 4;
+function treeSVG(stage, seed, isToday){
+  const r = (n) => { const x=Math.sin((seed+1)*(n+7)*12.9898)*43758.5453; return x-Math.floor(x); };
+  const H = Math.round([24,42,56,72,92][stage]*(0.85+r(1)*0.3));
+  const W = Math.round(H*0.78);
+  const greens = ["#3FB98A","#4FD1A1","#5CC76B","#74CF79","#46C2C2"];
+  const canopy = stage===0 ? "#8FE0BC" : greens[Math.floor(r(2)*greens.length)];
+  const cx=W/2, tw=Math.max(3,W*0.12), th=stage===0?H*0.55:H*0.32;
+  let s = `<rect x="${cx-tw/2}" y="${H-th}" width="${tw}" height="${th}" rx="${tw/2}" fill="#7A5638"/>`;
+  if(stage===0){
+    s += `<ellipse cx="${cx-W*0.16}" cy="${H-th}" rx="${W*0.22}" ry="${W*0.12}" fill="${canopy}" transform="rotate(-32 ${cx-W*0.16} ${H-th})"/>`;
+    s += `<ellipse cx="${cx+W*0.16}" cy="${H-th-2}" rx="${W*0.22}" ry="${W*0.12}" fill="${canopy}" transform="rotate(32 ${cx+W*0.16} ${H-th-2})"/>`;
+  } else {
+    s += `<circle cx="${cx}" cy="${H-th-H*0.2}" r="${W*0.44}" fill="${canopy}"/>`;
+    if(stage>=2) s += `<circle cx="${cx-W*0.3}" cy="${H-th-H*0.08}" r="${W*0.3}" fill="${canopy}"/><circle cx="${cx+W*0.3}" cy="${H-th-H*0.08}" r="${W*0.3}" fill="${canopy}"/>`;
+    if(stage>=3) s += `<circle cx="${cx}" cy="${H-th-H*0.4}" r="${W*0.32}" fill="${canopy}"/>`;
+    if(stage>=4) s += `<circle cx="${cx}" cy="${H-th-H*0.58}" r="${W*0.24}" fill="${canopy}"/>`;
+  }
+  if(isToday) s += `<circle cx="${cx}" cy="${H-1}" r="3" fill="${ACC.amber}"/>`;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible;opacity:${stage===0?0.85:1}">${s}</svg>`;
+}
+function lineSVG(d){
+  const W=300,H=120,p=18;
+  const xs=i=> d.length===1 ? W/2 : p+i*(W-2*p)/(d.length-1);
+  const ys=v=> H-p-((v-1)/4)*(H-2*p);
+  const pts=d.map((x,i)=>`${xs(i).toFixed(1)},${ys(x.e).toFixed(1)}`).join(" ");
+  const dots=d.map((x,i)=>`<circle cx="${xs(i).toFixed(1)}" cy="${ys(x.e).toFixed(1)}" r="3" fill="var(--indigo)"/>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart"><polyline points="${pts}" fill="none" stroke="var(--indigo)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>`;
+}
+function barSVG(d){
+  const W=300,H=110,p=14; const max=Math.max(1,...d.map(x=>x.p)); const gap=(W-2*p)/d.length; const bw=gap*0.62;
+  const bars=d.map((x,i)=>{ const bh=(x.p/max)*(H-2*p); const bx=p+i*gap+(gap-bw)/2;
+    return `<rect x="${bx.toFixed(1)}" y="${(H-p-bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="var(--sage)"/>`
+      + (x.p?`<text x="${(bx+bw/2).toFixed(1)}" y="${(H-p-bh-3).toFixed(1)}" text-anchor="middle" font-size="8" fill="var(--faint)">${x.p}</text>`:"");
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart">${bars}</svg>`;
+}
+
+/* ---------- tabs ---------- */
+function Today(){
+  const h=new Date().getHours();
+  const greet = h<12?"Good morning":h<18?"Good afternoon":"Good evening";
+  const ints = state.intentions[today()] || {forSure:[],capture:[]};
+  const naps = state.naps.filter(n=>n.date===today());
+
+  const menu = state.menu.map(it=>{
+    const used=usedToday(it), full=used>=it.limit, ac=accOf(it.accent);
+    const entries=state.logs.filter(l=>l.itemId===it.id && l.date===today());
+    let viz;
+    if(it.type==="times"){
+      const n=Math.max(it.limit,used); let pips="";
+      for(let i=0;i<n;i++){ const on=i<used, over=i>=it.limit, col=over?"var(--amber)":ac;
+        pips+=`<span class="pip" style="border-color:${col};${on?`background:${col};`:""}"></span>`; }
+      viz=`<div class="pips">${pips}</div>`;
+    } else {
+      const w=Math.min(used/it.limit,1)*100;
+      viz=`<div class="bar"><div class="barfill" style="width:${w}%;background:${full?"var(--amber)":ac}"></div></div>`;
+    }
+    const ctrls = it.type==="times"
+      ? `<button class="btn${full?" quiet":""}" onclick="App.logOne('${it.id}')">${icon("plus",15)} Log one</button>`
+      : `<button class="btn" onclick="App.addMin('${it.id}',15)">+15</button><button class="btn" onclick="App.addMin('${it.id}',30)">+30</button>`;
+    const tbtn = (it.session!=null||it.type==="minutes")
+      ? `<button class="btn quiet" onclick="App.startTimer('${it.id}')">${icon("play",14)} ${it.session?it.session+"-min ":""}timer</button>` : "";
+    const chips = entries.length
+      ? `<div class="chips">`+entries.map(l=>`<button class="chip" title="tap to remove" onclick="App.removeLog('${l.id}')">${it.type==="minutes"?l.minutes+"m":(l.minutes?l.minutes+"m":"done")} ${icon("x",11)}</button>`).join("")+`</div>` : "";
+    const fmsg = full ? `<div class="hint">That's your fill for today — enjoy it. More is fine if you mean to.</div>` : "";
+    return `<div class="card item">
+      <div class="itemhead"><span class="itemname">${esc(it.name)}</span>
+        <span class="mono ${full?"amberc":"subc"}">${it.type==="times"?used+" / "+it.limit:used+" / "+it.limit+" min"}</span></div>
+      ${viz}<div class="ctrls">${ctrls}${tbtn}</div>${chips}${fmsg}</div>`;
+  }).join("");
+
+  let intsHtml;
+  if(!ints.forSure.length && !(ints.capture||[]).length){
+    intsHtml=`<div class="subc sm">Nothing set yet. <span class="link" onclick="App.go('plan')">Plan a few</span> — one to three is plenty.</div>`;
+  } else {
+    intsHtml=["forSure","capture"].map(lane=>(ints[lane]||[]).map(x=>`
+      <label class="introw">
+        <span class="cbox ${x.done?"on":""}" onclick="App.toggleInt('${lane}','${x.id}')">${x.done?icon("check",13):""}</span>
+        <span class="${x.done?"done":""}">${esc(x.text)}</span>
+        ${x.points?`<span class="mono faintc pts">${x.points}p</span>`:""}
+        ${lane==="capture"?`<span class="tagmini">extra</span>`:""}
+      </label>`).join("")).join("");
+  }
+
+  return `
+    <header class="hd"><div class="h1">${greet}.</div><div class="subc sm mt2">${esc(prettyDay(today()))}</div></header>
+    <div class="eyebrow">What you can dip into</div>
+    <div class="stack">${menu}</div>
+    <div class="eyebrow">Today, for sure</div>
+    <div class="card">${intsHtml}</div>
+    <div class="eyebrow">Catch a thought</div>
+    <div class="card">
+      <div class="inrow"><input id="capture" class="input" placeholder="Something to look up later…"
+        oninput="App.bind('captureText',this.value)" onkeydown="if(event.key==='Enter')App.addCapture()">
+        <button class="btn solid" onclick="App.addCapture()">${icon("plus",16)}</button></div>
+      <div class="hint">Park it here, get back to what you were doing. Visit the list in its own time.</div>
+    </div>
+    <div class="eyebrow">Rest</div>
+    <div class="card naprow">
+      <div><div>${naps.length?naps.length+" nap"+(naps.length>1?"s":"")+" today":"No nap yet"}</div>
+      <div class="hint nm">Keep it under 20 min, before 3pm.</div></div>
+      <button class="btn" onclick="App.logNap()">${icon("coffee",15)} Log a nap</button>
+    </div>`;
+}
+
+function Plan(){
+  const day=ui.planDay; const d=state.intentions[day]||{forSure:[],capture:[]};
+  const tooMany=d.forSure.length>3;
+  const lanes=["forSure","capture"].map(l=>{
+    if(!(d[l]||[]).length) return "";
+    return `<div class="card"><div class="eyebrow">${l==="forSure"?"For sure":"Extra / maybe"}</div><div class="stacksm">`+
+      d[l].map(x=>`<div class="introw2"><span class="grow">${esc(x.text)}</span><span class="mono faintc">${x.points}p</span>
+        <button class="iconbtn" onclick="App.remInt('${l}','${x.id}')">${icon("x",14)}</button></div>`).join("")+`</div></div>`;
+  }).join("");
+  const inbox = !state.inbox.length
+    ? `<div class="subc sm">Empty. Whatever you catch on the Today screen lands here.</div>`
+    : state.inbox.map(x=>`<div class="introw2">
+        <span class="cbox sm ${x.done?"on":""}" onclick="App.toggleInbox('${x.id}')">${x.done?icon("check",12):""}</span>
+        <span class="grow ${x.done?"done":""}">${esc(x.text)}</span>
+        <button class="iconbtn" onclick="App.delInbox('${x.id}')">${icon("trash",14)}</button></div>`).join("");
+  return `
+    <header class="hd"><div class="h1">Plan</div></header>
+    <div class="daynav">
+      <button class="iconbtn" onclick="App.planDay(-1)">${icon("chevL",18)}</button>
+      <div class="daylbl"><div>${esc(prettyDay(day))}</div>
+        ${day===today()?'<div class="faintc xs">today</div>':day===addDays(today(),1)?'<div class="sagec xs">tomorrow</div>':""}</div>
+      <button class="iconbtn" onclick="App.planDay(1)">${icon("chevR",18)}</button>
+    </div>
+    <div class="card">
+      <div class="seg">
+        <button class="segbtn ${ui.planLane==="forSure"?"on":""}" onclick="App.setLane('forSure')">For sure</button>
+        <button class="segbtn ${ui.planLane==="capture"?"on":""}" onclick="App.setLane('capture')">Extra / maybe</button>
+      </div>
+      <div class="inrow">
+        <input id="planinput" class="input" placeholder="Add an intention…"
+          oninput="App.bind('planText',this.value)" onkeydown="if(event.key==='Enter')App.addInt()">
+        <div class="stepper"><button onclick="App.pts(-1)">–</button><span class="mono">${ui.planPoints}p</span><button onclick="App.pts(1)">+</button></div>
+        <button class="btn solid" onclick="App.addInt()">${icon("plus",16)}</button>
+      </div>
+      ${tooMany&&ui.planLane==="forSure"?`<div class="hint amberc">That's more than three for-sures. Finishing a short list beats half-doing a long one — consider moving some to "extra".</div>`:""}
+    </div>
+    ${lanes}
+    <div class="eyebrow">Deferred thoughts</div>
+    <div class="card">${inbox}</div>`;
+}
+
+function Journal(){
+  const e=state.journal[today()]||{energy:0,mood:"",did:"",felt:""};
+  const dots=[1,2,3,4,5].map(n=>`<button class="enbtn ${e.energy>=n?"on":""}" onclick="App.energy(${n})">${n}</button>`).join("");
+  const past=Object.entries(state.journal).filter(([d])=>d!==today()).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,14)
+    .map(([d,j])=>`<div class="card pad12"><div class="introw2"><span class="subc sm grow">${esc(prettyDay(d))}</span>
+      <span class="mono indigoc">${j.energy?"energy "+j.energy:""}</span></div>
+      ${j.mood?`<div class="sm mt4">${esc(j.mood)}</div>`:""}${j.felt?`<div class="subc sm mt4">${esc(j.felt)}</div>`:""}</div>`).join("");
+  return `
+    <header class="hd"><div class="h1">Tonight</div><div class="subc sm mt2">Ten quiet minutes. No need to be tidy.</div></header>
+    <div class="card"><div class="eyebrow">Energy today</div><div class="enrow">${dots}</div>
+      <div class="enlbl"><span>drained</span><span>full</span></div></div>
+    <div class="card"><div class="eyebrow">A word for the mood</div>
+      <input class="input full" value="${esc(e.mood)}" placeholder="restless, calm, low, content…" oninput="App.setJournal('mood',this.value)"></div>
+    <div class="card"><div class="eyebrow">What I actually did</div>
+      <textarea class="ta" rows="3" placeholder="The real list, big and small." oninput="App.setJournal('did',this.value)">${esc(e.did)}</textarea></div>
+    <div class="card"><div class="eyebrow">How it felt</div>
+      <textarea class="ta" rows="3" placeholder="And how the day sat with you." oninput="App.setJournal('felt',this.value)">${esc(e.felt)}</textarea></div>
+    ${past?`<div class="eyebrow">Earlier nights</div><div class="stack">${past}</div>`:""}`;
+}
+
+function Stats(){
+  const y=ui.statsY, m=ui.statsM, prefix=`${y}-${pad(m+1)}`;
+  const label=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  const dim=new Date(y,m+1,0).getDate();
+  const dayScore=ds=>state.logs.filter(l=>l.date===ds).length +
+    ((state.intentions[ds]?.forSure||[]).concat(state.intentions[ds]?.capture||[]).filter(x=>x.done).length);
+  let trees=""; for(let i=1;i<=dim;i++){ const ds=`${prefix}-${pad(i)}`; trees+=treeSVG(stageOf(dayScore(ds)),i,ds===today()); }
+  const streak=id=>{ let c=0; let cur=state.logs.some(l=>l.itemId===id&&l.date===today())?today():addDays(today(),-1);
+    while(state.logs.some(l=>l.itemId===id&&l.date===cur)){ c++; cur=addDays(cur,-1); } return c; };
+  const mcount=id=>state.logs.filter(l=>l.itemId===id&&l.date.startsWith(prefix)).length;
+  const acts=state.menu.map(it=>{ const st=streak(it.id);
+    return `<div class="actrow"><span class="adot" style="background:${accOf(it.accent)}"></span>
+      <span class="grow sm">${esc(it.name)}</span><span class="mono subc">${mcount(it.id)}×</span>
+      <span class="mono ${st?"sagec":"faintc"} streakw">${st?st+"d streak":"—"}</span></div>`; }).join("");
+  const ed=[]; for(let i=1;i<=dim;i++){ const ds=`${prefix}-${pad(i)}`; if(state.journal[ds]?.energy) ed.push({d:i,e:state.journal[ds].energy}); }
+  const pdat=[]; for(let i=13;i>=0;i--){ const ds=addDays(today(),-i);
+    const done=(state.intentions[ds]?.forSure||[]).concat(state.intentions[ds]?.capture||[]).filter(x=>x.done).reduce((a,x)=>a+(x.points||1),0);
+    pdat.push({d:Number(ds.slice(-2)),p:done}); }
+  const mpoints=Object.entries(state.intentions).filter(([d])=>d.startsWith(prefix))
+    .reduce((a,[,v])=>a+(v.forSure||[]).concat(v.capture||[]).filter(x=>x.done).reduce((b,x)=>b+(x.points||1),0),0);
+  return `
+    <header class="statshd">
+      <button class="iconbtn" onclick="App.statMonth(-1)">${icon("chevL",18)}</button>
+      <div class="h2">${label}</div>
+      <button class="iconbtn" onclick="App.statMonth(1)">${icon("chevR",18)}</button>
+    </header>
+    <div class="card"><div class="eyebrow">Your forest this month</div>
+      <div class="forest"><div class="forestrow">${trees}</div></div>
+      <div class="hint mt8">Each day is a tree. Busy days grow tall, quiet days stay saplings — and nothing ever dies.</div></div>
+    <div class="card"><div class="eyebrow">Your menu this month</div><div class="stacksm">${acts}</div></div>
+    <div class="card"><div class="eyebrow">Energy through the month</div>
+      ${ed.length<2?`<div class="subc sm">A couple of journal nights and a line shows up here.</div>`:lineSVG(ed)}</div>
+    <div class="card"><div class="pointshd"><div class="eyebrow nomb">Points finished</div>
+      <span class="mono sagec big">${mpoints}</span></div>${barSVG(pdat)}
+      <div class="hint mt4">Last 14 days. Watch this to learn your real daily capacity.</div></div>`;
+}
+
+function SettingsTab(){
+  const accents=["sage","indigo","amber","rose","sky","lilac"];
+  const items=state.menu.map(it=>`
+    <div class="card pad12">
+      <div class="introw2"><input class="nameinput grow" value="${esc(it.name)}" oninput="App.editName('${it.id}',this.value)">
+        <button class="iconbtn" onclick="App.delItem('${it.id}')">${icon("trash",15)}</button></div>
+      <div class="itemedit">
+        <select class="sel" onchange="App.editType('${it.id}',this.value)">
+          <option value="times" ${it.type==="times"?"selected":""}>times / day</option>
+          <option value="minutes" ${it.type==="minutes"?"selected":""}>minutes / day</option>
+        </select>
+        <div class="stepper"><button onclick="App.editLimit('${it.id}',-1)">–</button><span class="mono lim">${it.limit}</span><button onclick="App.editLimit('${it.id}',1)">+</button></div>
+        <div class="acc">${accents.map(a=>`<button class="accbtn ${it.accent===a?"on":""}" style="background:${accOf(a)}" onclick="App.editAccent('${it.id}','${a}')"></button>`).join("")}</div>
+      </div>
+    </div>`).join("");
+  return `
+    <header class="hd"><div class="h1">More</div></header>
+    <div class="eyebrow">Your downtime menu</div>
+    <div class="stack">${items}<button class="btn" onclick="App.addItem()">${icon("plus",15)} Add to the menu</button></div>
+    <div class="eyebrow">Your data</div>
+    <div class="card"><div class="subc sm mb12">Everything lives on this device only. Take a copy whenever you like.</div>
+      <div class="inrow"><button class="btn" onclick="App.exportJSON()">${icon("download",15)} JSON</button>
+        <button class="btn" onclick="App.exportCSV()">${icon("download",15)} Logs CSV</button></div></div>
+    <div class="eyebrow">Start over</div>
+    <div class="card">${ui.confirmReset
+      ? `<div class="introw2"><span class="subc sm grow">This wipes all logs, plans and journal. Sure?</span>
+          <button class="btn quiet" onclick="App.cancelReset()">Keep</button>
+          <button class="btn danger" onclick="App.doReset()">Wipe</button></div>`
+      : `<button class="btn danger-outline" onclick="App.askReset()">${icon("trash",15)} Clear everything</button>`}</div>
+    <div class="footer">Built around one idea: make the effort visible, keep the rest gentle.</div>`;
+}
+
+const TABS = { today:Today, plan:Plan, journal:Journal, stats:Stats, settings:SettingsTab };
+
+/* ---------- nav + render ---------- */
+function renderNav(){
+  const items=[["today","home","Today"],["plan","cal","Plan"],["journal","book","Journal"],["stats","chart","Stats"],["settings","more","More"]];
+  $("nav").innerHTML=items.map(([k,ico,lbl])=>`<button class="navbtn ${ui.tab===k?"active":""}" onclick="App.go('${k}')">${icon(ico,20)}<span>${lbl}</span></button>`).join("");
+}
+function renderTimer(){
+  const bar=$("timerbar");
+  if(!ui.timer){ bar.style.display="none"; bar.innerHTML=""; return; }
+  const it=state.menu.find(m=>m.id===ui.timer.itemId);
+  const mm=pad(Math.floor(ui.timer.left/60)), ss=pad(ui.timer.left%60);
+  bar.style.display="flex";
+  bar.innerHTML=`<div class="timercard"><span class="tdot" style="background:${accOf(it.accent)}"></span>
+    <span class="tname">${esc(it.name)}</span><span class="tclock">${mm}:${ss}</span>
+    <button class="ticon" onclick="App.finishTimer()">${icon("check",18)}</button>
+    <button class="ticon faint" onclick="App.cancelTimer()">${icon("x",18)}</button></div>`;
+}
+function render(){
+  $("app").innerHTML = TABS[ui.tab]();
+  renderNav(); renderTimer();
+  if(ui.tab==="today"){ const c=$("capture"); if(c) c.value=ui.captureText||""; }
+  if(ui.tab==="plan"){ const p=$("planinput"); if(p) p.value=ui.planText||""; }
+  window.scrollTo(0,0);
+}
+
+/* ---------- App handlers ---------- */
+const App = {
+  go(t){ ui.tab=t; render(); },
+  bind(k,v){ ui[k]=v; },
+  logOne(id){ const it=state.menu.find(m=>m.id===id); state.logs.push({id:uid(),date:today(),itemId:id,minutes:it.session||0}); save(); render(); },
+  addMin(id,min){ state.logs.push({id:uid(),date:today(),itemId:id,minutes:min}); save(); render(); },
+  removeLog(id){ state.logs=state.logs.filter(l=>l.id!==id); save(); render(); },
+  startTimer(id){
+    const it=state.menu.find(m=>m.id===id); if(!it) return;
+    const mins=it.session || (it.type==="minutes"?Math.min(it.limit,25):15);
+    ui.timer={itemId:id,left:mins*60,total:mins*60};
+    if(ui._tick) clearInterval(ui._tick);
+    ui._tick=setInterval(()=>{ if(!ui.timer){ clearInterval(ui._tick); return; } ui.timer.left--; if(ui.timer.left<=0) App.finishTimer(); else renderTimer(); },1000);
+    renderTimer();
+  },
+  finishTimer(){
+    if(ui._tick) clearInterval(ui._tick);
+    const t=ui.timer; ui.timer=null;
+    if(!t){ renderTimer(); return; }
+    const it=state.menu.find(m=>m.id===t.itemId);
+    const mins=Math.round((t.total-t.left)/60) || Math.round(t.total/60);
+    if(it){ if(it.type==="times") state.logs.push({id:uid(),date:today(),itemId:it.id,minutes:it.session||mins});
+      else state.logs.push({id:uid(),date:today(),itemId:it.id,minutes:mins}); }
+    save(); render();
+  },
+  cancelTimer(){ if(ui._tick) clearInterval(ui._tick); ui.timer=null; renderTimer(); },
+  toggleInt(lane,id){ const day=state.intentions[today()]; if(!day) return; day[lane]=day[lane].map(x=>x.id===id?Object.assign({},x,{done:!x.done}):x); save(); render(); },
+  addCapture(){ const t=(ui.captureText||"").trim(); if(!t) return; state.inbox.unshift({id:uid(),text:t,done:false,ts:Date.now()}); ui.captureText=""; save(); render(); },
+  toggleInbox(id){ state.inbox=state.inbox.map(x=>x.id===id?Object.assign({},x,{done:!x.done}):x); save(); render(); },
+  delInbox(id){ state.inbox=state.inbox.filter(x=>x.id!==id); save(); render(); },
+  logNap(){ state.naps.unshift({id:uid(),date:today(),ts:Date.now(),before3:new Date().getHours()<15}); save(); render(); },
+  planDay(d){ ui.planDay=addDays(ui.planDay,d); render(); },
+  setLane(l){ ui.planLane=l; render(); },
+  pts(d){ ui.planPoints=Math.max(1,ui.planPoints+d); render(); },
+  addInt(){ const t=(ui.planText||"").trim(); if(!t) return; const day=ui.planDay;
+    if(!state.intentions[day]) state.intentions[day]={forSure:[],capture:[]};
+    state.intentions[day][ui.planLane].push({id:uid(),text:t,points:ui.planPoints,done:false});
+    ui.planText=""; ui.planPoints=1; save(); render(); },
+  remInt(l,id){ state.intentions[ui.planDay][l]=state.intentions[ui.planDay][l].filter(x=>x.id!==id); save(); render(); },
+  energy(n){ state.journal[today()]=Object.assign({energy:0,mood:"",did:"",felt:""},state.journal[today()],{energy:n,ts:Date.now()}); save(); render(); },
+  setJournal(k,v){ state.journal[today()]=Object.assign({energy:0,mood:"",did:"",felt:""},state.journal[today()],{[k]:v,ts:Date.now()}); save(); },
+  statMonth(d){ let m=ui.statsM+d, y=ui.statsY; if(m<0){m=11;y--;} if(m>11){m=0;y++;} ui.statsM=m; ui.statsY=y; render(); },
+  editName(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ it.name=v; save(); } },
+  editType(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ it.type=v; save(); render(); } },
+  editLimit(id,d){ const it=state.menu.find(m=>m.id===id); if(it){ const step=it.type==="minutes"?5:1; it.limit=Math.max(1,it.limit+d*step); save(); render(); } },
+  editAccent(id,a){ const it=state.menu.find(m=>m.id===id); if(it){ it.accent=a; save(); render(); } },
+  addItem(){ state.menu.push({id:uid(),name:"New thing",type:"times",limit:1,session:null,accent:"rose"}); save(); render(); },
+  delItem(id){ state.menu=state.menu.filter(m=>m.id!==id); save(); render(); },
+  exportJSON(){ download("grove-data.json", JSON.stringify(state,null,2)); },
+  exportCSV(){ const rows=[["date","item","minutes"]].concat(state.logs.map(l=>{ const m=state.menu.find(x=>x.id===l.itemId); return [l.date, m?m.name:l.itemId, l.minutes||0]; }));
+    download("grove-logs.csv", rows.map(r=>r.join(",")).join("\n")); },
+  askReset(){ ui.confirmReset=true; render(); },
+  cancelReset(){ ui.confirmReset=false; render(); },
+  doReset(){ state=clone(BLANK); save(); ui.confirmReset=false; render(); },
+};
+window.App = App;
+
+function download(name,text){
+  const blob=new Blob([text],{type:"text/plain"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+/* ---------- boot ---------- */
+render();
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Grove",
+  "short_name": "Grove",
+  "description": "A gentle place to keep your downtime intentional and your effort visible.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#13141E",
+  "theme_color": "#13141E",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
