@@ -1,60 +1,48 @@
-GROVE — your downtime & intentions app
-======================================
+# Grove
 
-WHAT THIS IS
-A self-contained app. No accounts, no servers, no tracking. Everything you
-log stays in your phone's local storage. It works fully offline once installed.
+A small, private companion for keeping downtime intentional and effort visible.
+No accounts, no servers, no tracking — everything you log stays on your own device.
 
-WHAT'S IN THIS FOLDER
-  index.html              the whole app
-  manifest.webmanifest    makes it installable with its own icon
-  sw.js                   service worker (offline support)
-  icon-192.png            app icon
-  icon-512.png            app icon
-  apple-touch-icon.png    iOS icon
-Keep all files together in the same folder.
+## What it does
 
+- **Today** — a menu of downtime activities with daily caps you tap down (pips for counts, a bar for minutes), each with a built-in timer. Plus today's intentions to check off, a quick capture box for stray thoughts, and a nap log.
+- **Plan** — set tomorrow's one-to-three "for sure" intentions (with rough effort points), and clear your deferred-thoughts inbox.
+- **Journal** — a nightly entry: energy rating, mood, what you did, how it felt.
+- **Stats** — a forest that grows from your activity (each day is a tree; busy days grow tall, quiet days stay saplings), plus per-activity counts and streaks, an energy trend, and points finished.
+- **More** — edit the menu items and caps, export your data, or reset.
 
-GET IT ON YOUR PHONE — easiest route (no tools, ~2 minutes)
------------------------------------------------------------
-A phone "installable" app needs to be served over https. The simplest way:
+## Tech
 
-1. On your computer, go to:  https://app.netlify.com/drop
-2. Drag this whole "grove" folder onto the page.
-   (A free Netlify account may be asked for — that's fine.)
-3. It gives you a link like  https://something-random.netlify.app
-4. Open that link on your phone (text it to yourself, or it shows a QR).
-5. Install it (see "ADD TO HOME SCREEN" below).
+Plain HTML, CSS, and JavaScript. No build step, no dependencies, no frameworks.
+Installable as a PWA and fully offline after first load via a service worker.
 
-That link is yours and stays live. Bookmark it in case you reinstall.
+## Data & privacy
 
-Alternatives that also work: GitHub Pages, Cloudflare Pages, Vercel — any
-static host over https.
+- All data is stored in the browser's local storage **on the device only**.
+- Nothing is sent anywhere. The repo contains code, never personal data.
+- Back up any time from **More → JSON / Logs CSV**.
+- Clearing the site's data or uninstalling erases everything, so export occasionally.
 
+## Install (Android)
 
-ADD TO HOME SCREEN (so it becomes a real app icon)
---------------------------------------------------
-Chrome on Android:
-  - Open the link, tap the ⋮ menu, tap "Add to Home screen" / "Install app".
-Samsung Internet:
-  - Open the link, tap the menu, tap "Add page to" → "Home screen".
+1. Open the live link in Chrome and let it fully load.
+2. Reload once so the service worker registers.
+3. Menu (⋮) → **Install app**.
 
-After that, Grove launches full-screen from its own icon and runs offline.
+## Hosting notes
 
+Served via GitHub Pages from the repo root. All paths are relative, so it works
+from a project subpath (e.g. `username.github.io/grove/`) without changes.
 
-YOUR DATA
-- Stored only on this device (browser local storage).
-- More tab → JSON / Logs CSV gives you a backup any time.
-- Clearing the browser's site data, or uninstalling, erases it — so export
-  now and then if it matters to you.
-- Reinstalling from the same link is fine; just don't "clear site data".
+## Files
 
+| File | Purpose |
+|------|---------|
+| `index.html` | The whole app |
+| `sw.js` | Service worker (offline caching) |
+| `manifest.webmanifest` | Makes it installable with its own icon |
+| `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | App icons |
 
-WANT TO CHANGE SOMETHING LATER
-- Small text/colour tweaks: edit index.html and re-upload the folder.
-- Bigger changes, or to build a native version: hand this folder to Claude
-  Code (Code tab in the Claude desktop app). It can run a real build, add
-  features, and redeploy for you. The whole thing is plain HTML/CSS/JS, so
-  it's easy to extend.
+---
 
-Built around one idea: make the effort visible, keep the rest gentle.
+*Built around one idea: make the effort visible, keep the rest gentle.*
