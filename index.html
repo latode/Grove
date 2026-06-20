@@ -335,7 +335,7 @@ function Journal(){
   const past=Object.entries(state.journal).filter(([d])=>d!==today()).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,14)
     .map(([d,j])=>`<div class="card pad12"><div class="introw2"><span class="subc sm grow">${esc(prettyDay(d))}</span>
       <span class="mono indigoc">${j.energy?"energy "+j.energy:""}</span></div>
-      ${j.mood?`<div class="sm mt4">${esc(j.mood)}</div>`:""}${j.felt?`<div class="subc sm mt4">${esc(j.felt)}</div>`:""}</div>`).join("");
+      ${j.mood?`<div class="sm mt4">${esc(j.mood)}</div>`:""}${j.did?`<div class="subc sm mt4">${esc(j.did)}</div>`:""}${j.felt?`<div class="subc sm mt4">${esc(j.felt)}</div>`:""}</div>`).join("");
   return `
     <header class="hd"><div class="h1">Tonight</div><div class="subc sm mt2">Ten quiet minutes. No need to be tidy.</div></header>
     <div class="card"><div class="eyebrow">Energy today</div><div class="enrow">${dots}</div>
