@@ -353,7 +353,8 @@ function Stats(){
   const y=ui.statsY, m=ui.statsM, prefix=`${y}-${pad(m+1)}`;
   const label=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
   const dim=new Date(y,m+1,0).getDate();
-  const dayScore=ds=>state.logs.filter(l=>l.date===ds).length +
+  const growsTree=id=>{ const it=state.menu.find(m=>m.id===id); return !it || it.growsTree!==false; };
+  const dayScore=ds=>state.logs.filter(l=>l.date===ds&&growsTree(l.itemId)).length +
     ((state.intentions[ds]?.forSure||[]).concat(state.intentions[ds]?.capture||[]).filter(x=>x.done).length);
   let trees=""; for(let i=1;i<=dim;i++){ const ds=`${prefix}-${pad(i)}`; trees+=treeSVG(stageOf(dayScore(ds)),i,ds===today()); }
   const streak=id=>{ let c=0; let cur=state.logs.some(l=>l.itemId===id&&l.date===today())?today():addDays(today(),-1);
@@ -400,6 +401,10 @@ function SettingsTab(){
         <div class="stepper"><button onclick="App.editLimit('${it.id}',-1)">–</button><span class="mono lim">${it.limit}</span><button onclick="App.editLimit('${it.id}',1)">+</button></div>
         <div class="acc">${accents.map(a=>`<button class="accbtn ${it.accent===a?"on":""}" style="background:${accOf(a)}" onclick="App.editAccent('${it.id}','${a}')"></button>`).join("")}</div>
       </div>
+      <label class="introw2" style="margin-top:8px;cursor:pointer" onclick="App.editGrows('${it.id}')">
+        <span class="cbox sm ${it.growsTree!==false?"on":""}">${it.growsTree!==false?icon("check",12):""}</span>
+        <span class="sm subc">Grows the tree</span>
+      </label>
     </div>`).join("");
   return `
     <header class="hd"><div class="h1">More</div></header>
@@ -490,7 +495,8 @@ const App = {
   editType(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ it.type=v; save(); render(); } },
   editLimit(id,d){ const it=state.menu.find(m=>m.id===id); if(it){ const step=it.type==="minutes"?5:1; it.limit=Math.max(1,it.limit+d*step); save(); render(); } },
   editAccent(id,a){ const it=state.menu.find(m=>m.id===id); if(it){ it.accent=a; save(); render(); } },
-  addItem(){ state.menu.push({id:uid(),name:"New thing",type:"times",limit:1,session:null,accent:"rose"}); save(); render(); },
+  editGrows(id){ const it=state.menu.find(m=>m.id===id); if(it){ it.growsTree=it.growsTree===false; save(); render(); } },
+  addItem(){ state.menu.push({id:uid(),name:"New thing",type:"times",limit:1,session:null,accent:"rose",growsTree:true}); save(); render(); },
   delItem(id){ state.menu=state.menu.filter(m=>m.id!==id); save(); render(); },
   exportJSON(){ download("grove-data.json", JSON.stringify(state,null,2)); },
   exportCSV(){ const rows=[["date","item","minutes"]].concat(state.logs.map(l=>{ const m=state.menu.find(x=>x.id===l.itemId); return [l.date, m?m.name:l.itemId, l.minutes||0]; }));
