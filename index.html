@@ -651,7 +651,15 @@ function download(name,text){
 
 /* ---------- boot ---------- */
 render();
-if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+if("serviceWorker" in navigator){
+  const hadController = !!navigator.serviceWorker.controller;
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  let _reloading=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(_reloading) return; _reloading=true;
+    if(hadController) window.location.reload();
+  });
+}
 </script>
 </body>
 </html>

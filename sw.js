@@ -1,4 +1,4 @@
-const CACHE = "grove-v8";
+const CACHE = "grove-v9";
 const ASSETS = [
   "./",
   "./index.html",
@@ -21,11 +21,25 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then((hit) =>
-      hit || fetch(e.request).then((resp) => {
+  const req = e.request;
+  const isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
+  if (isHTML) {
+    // Network-first for the page itself, so a deployed update shows on next open.
+    e.respondWith(
+      fetch(req).then((resp) => {
         const copy = resp.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy));
+        caches.open(CACHE).then((c) => c.put(req, copy));
+        return resp;
+      }).catch(() => caches.match(req).then((h) => h || caches.match("./index.html")))
+    );
+    return;
+  }
+  // Cache-first for static assets (icons, manifest).
+  e.respondWith(
+    caches.match(req).then((hit) =>
+      hit || fetch(req).then((resp) => {
+        const copy = resp.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
         return resp;
       }).catch(() => caches.match("./index.html"))
     )
