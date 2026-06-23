@@ -203,12 +203,13 @@ function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e
 let state = load();
 
 const now = new Date();
-const ui = { tab:"today", planDay:addDays(today(),1), planLane:"forSure", planPoints:1,
+const ui = { tab:"today", todayDay:today(), planDay:addDays(today(),1), planLane:"forSure", planPoints:1,
   captureText:"", planText:"", statsY:now.getFullYear(), statsM:now.getMonth(), timer:null, _tick:null, confirmReset:false };
 
 /* ---------- logging ---------- */
-const todaysFor = (id) => state.logs.filter(l => l.itemId===id && l.date===today());
-const usedToday = (it) => it.type==="times" ? todaysFor(it.id).length : todaysFor(it.id).reduce((a,l)=>a+(l.minutes||0),0);
+const logsFor = (id, ds) => state.logs.filter(l => l.itemId===id && l.date===ds);
+const usedOn = (it, ds) => it.type==="times" ? logsFor(it.id,ds).length : logsFor(it.id,ds).reduce((a,l)=>a+(l.minutes||0),0);
+const viewedDay = () => ui.todayDay || today();
 
 /* ---------- resists (daily yes/no) ---------- */
 const resistAns = (id, ds) => state.resistLogs[ds] ? state.resistLogs[ds][id] : undefined;
@@ -289,14 +290,16 @@ function barSVG(d){
 
 /* ---------- tabs ---------- */
 function Today(){
+  const day = ui.todayDay || today();
+  const isToday = day===today();
   const h=new Date().getHours();
   const greet = h<12?"Good morning":h<18?"Good afternoon":"Good evening";
-  const ints = state.intentions[today()] || {forSure:[],capture:[]};
-  const naps = state.naps.filter(n=>n.date===today());
+  const ints = state.intentions[day] || {forSure:[],capture:[]};
+  const naps = state.naps.filter(n=>n.date===day);
 
   const menu = state.menu.map(it=>{
-    const used=usedToday(it), full=used>=it.limit, ac=accOf(it.accent);
-    const entries=state.logs.filter(l=>l.itemId===it.id && l.date===today());
+    const used=usedOn(it,day), full=used>=it.limit, ac=accOf(it.accent);
+    const entries=state.logs.filter(l=>l.itemId===it.id && l.date===day);
     let viz;
     if(it.type==="times"){
       const n=Math.max(it.limit,used); let pips="";
@@ -338,7 +341,7 @@ function Today(){
   if(!state.resists.length){
     resistsHtml=`<div class="subc sm">Nothing to hold yet. <span class="link" onclick="App.go('settings')">Add a few</span> — things you'd rather not give in to.</div>`;
   } else {
-    resistsHtml=state.resists.map(rz=>{ const ans=resistAns(rz.id,today());
+    resistsHtml=state.resists.map(rz=>{ const ans=resistAns(rz.id,day);
       return `<div class="resistrow">
         <span class="grow">${esc(rz.name)}</span>
         <div class="yn">
@@ -348,7 +351,15 @@ function Today(){
   }
 
   return `
-    <header class="hd"><div class="h1">${greet}.</div><div class="subc sm mt2">${esc(prettyDay(today()))}</div></header>
+    <header class="hd"><div class="h1">${greet}.</div></header>
+    <div class="daynav">
+      <button class="iconbtn" onclick="App.viewDay(-1)">${icon("chevL",18)}</button>
+      <div class="daylbl"><div>${esc(prettyDay(day))}</div>
+        ${isToday?'<div class="faintc xs">today</div>':day===addDays(today(),-1)?'<div class="amberc xs">yesterday</div>':'<div class="amberc xs">earlier day</div>'}</div>
+      ${isToday?`<button class="iconbtn" style="opacity:.3" disabled>${icon("chevR",18)}</button>`
+        :`<button class="iconbtn" onclick="App.viewDay(1)">${icon("chevR",18)}</button>`}
+    </div>
+    ${isToday?"":`<div class="card pad12" style="margin-bottom:18px"><div class="hint" style="margin:0">Catching up on a past day — anything you log still counts toward that day's tree and your streaks. <span class="link" onclick="App.goToday()">Back to today</span></div></div>`}
     <div class="eyebrow">What you can dip into</div>
     <div class="stack">${menu}</div>
     <div class="eyebrow">Today, for sure</div>
@@ -544,10 +555,12 @@ function render(){
 
 /* ---------- App handlers ---------- */
 const App = {
-  go(t){ ui.tab=t; render(); },
+  go(t){ if(t==="today") ui.todayDay=today(); ui.tab=t; render(); },
+  viewDay(d){ const nd=addDays(viewedDay(),d); if(nd>today()) return; ui.todayDay=nd; render(); },
+  goToday(){ ui.todayDay=today(); render(); },
   bind(k,v){ ui[k]=v; },
-  logOne(id){ const it=state.menu.find(m=>m.id===id); state.logs.push({id:uid(),date:today(),itemId:id,minutes:it.session||0}); save(); render(); },
-  addMin(id,min){ state.logs.push({id:uid(),date:today(),itemId:id,minutes:min}); save(); render(); },
+  logOne(id){ const it=state.menu.find(m=>m.id===id); state.logs.push({id:uid(),date:viewedDay(),itemId:id,minutes:it.session||0}); save(); render(); },
+  addMin(id,min){ state.logs.push({id:uid(),date:viewedDay(),itemId:id,minutes:min}); save(); render(); },
   removeLog(id){ state.logs=state.logs.filter(l=>l.id!==id); save(); render(); },
   startTimer(id){
     const it=state.menu.find(m=>m.id===id); if(!it) return;
@@ -563,16 +576,16 @@ const App = {
     if(!t){ renderTimer(); return; }
     const it=state.menu.find(m=>m.id===t.itemId);
     const mins=Math.round((t.total-t.left)/60) || Math.round(t.total/60);
-    if(it){ if(it.type==="times") state.logs.push({id:uid(),date:today(),itemId:it.id,minutes:it.session||mins});
-      else state.logs.push({id:uid(),date:today(),itemId:it.id,minutes:mins}); }
+    if(it){ if(it.type==="times") state.logs.push({id:uid(),date:viewedDay(),itemId:it.id,minutes:it.session||mins});
+      else state.logs.push({id:uid(),date:viewedDay(),itemId:it.id,minutes:mins}); }
     save(); render();
   },
   cancelTimer(){ if(ui._tick) clearInterval(ui._tick); ui.timer=null; renderTimer(); },
-  toggleInt(lane,id){ const day=state.intentions[today()]; if(!day) return; day[lane]=day[lane].map(x=>x.id===id?Object.assign({},x,{done:!x.done}):x); save(); render(); },
+  toggleInt(lane,id){ const day=state.intentions[viewedDay()]; if(!day) return; day[lane]=day[lane].map(x=>x.id===id?Object.assign({},x,{done:!x.done}):x); save(); render(); },
   addCapture(){ const t=(ui.captureText||"").trim(); if(!t) return; state.inbox.unshift({id:uid(),text:t,done:false,ts:Date.now()}); ui.captureText=""; save(); render(); },
   toggleInbox(id){ state.inbox=state.inbox.map(x=>x.id===id?Object.assign({},x,{done:!x.done}):x); save(); render(); },
   delInbox(id){ state.inbox=state.inbox.filter(x=>x.id!==id); save(); render(); },
-  logNap(){ state.naps.unshift({id:uid(),date:today(),ts:Date.now(),before3:new Date().getHours()<15}); save(); render(); },
+  logNap(){ state.naps.unshift({id:uid(),date:viewedDay(),ts:Date.now(),before3:new Date().getHours()<15}); save(); render(); },
   planDay(d){ ui.planDay=addDays(ui.planDay,d); render(); },
   setLane(l){ ui.planLane=l; render(); },
   pts(d){ ui.planPoints=Math.max(1,ui.planPoints+d); render(); },
@@ -591,7 +604,7 @@ const App = {
   editGrows(id){ const it=state.menu.find(m=>m.id===id); if(it){ it.growsTree=it.growsTree===false; save(); render(); } },
   addItem(){ state.menu.push({id:uid(),name:"New thing",type:"times",limit:1,session:null,accent:"rose",growsTree:true}); save(); render(); },
   delItem(id){ state.menu=state.menu.filter(m=>m.id!==id); save(); render(); },
-  setResist(id,val){ const ds=today(); if(!state.resistLogs[ds]) state.resistLogs[ds]={};
+  setResist(id,val){ const ds=viewedDay(); if(!state.resistLogs[ds]) state.resistLogs[ds]={};
     if(state.resistLogs[ds][id]===val) delete state.resistLogs[ds][id]; else state.resistLogs[ds][id]=val;
     save(); render(); },
   addResist(){ state.resists.push({id:uid(),name:"New limit"}); save(); render(); },
