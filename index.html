@@ -403,11 +403,12 @@ function Plan(){
   });
   const leftovers = !left.length
     ? `<div class="subc sm">Nothing left hanging. Tasks you didn't finish on past days show up here.</div>`
-    : `<div class="hint" style="margin:0 0 11px">Tap one to carry it over to ${esc(prettyDay(day))}.</div>`+
+    : `<div class="hint" style="margin:0 0 11px">Tap + to carry it over to ${esc(prettyDay(day))}, into "${ui.planLane==="forSure"?"For sure":"Extra / maybe"}" (use the toggle above to change). Trash drops it.</div>`+
       left.map(o=>`<div class="introw2">
         <span class="grow">${esc(o.x.text)} <span class="faintc xs">· ${shortDay(o.date)}</span></span>
         <span class="mono faintc">${o.x.points}p</span>
-        <button class="iconbtn" onclick="App.pullLeftover('${o.date}','${o.lane}','${o.x.id}')">${icon("plus",14)}</button></div>`).join("");
+        <button class="iconbtn" onclick="App.pullLeftover('${o.date}','${o.lane}','${o.x.id}')">${icon("plus",14)}</button>
+        <button class="iconbtn" onclick="App.delLeftover('${o.date}','${o.lane}','${o.x.id}')">${icon("trash",14)}</button></div>`).join("");
   return `
     <header class="hd"><div class="h1">Plan</div></header>
     <div class="daynav">
@@ -611,9 +612,11 @@ const App = {
   pullLeftover(date,lane,id){ const src=state.intentions[date]; if(!src||!src[lane]) return;
     const item=src[lane].find(x=>x.id===id); if(!item) return;
     src[lane]=src[lane].filter(x=>x.id!==id);
-    const day=ui.planDay; if(!state.intentions[day]) state.intentions[day]={forSure:[],capture:[]};
-    state.intentions[day][lane].push({id:uid(),text:item.text,points:item.points,done:false});
+    const day=ui.planDay, dl=ui.planLane; if(!state.intentions[day]) state.intentions[day]={forSure:[],capture:[]};
+    state.intentions[day][dl].push({id:uid(),text:item.text,points:item.points,done:false});
     save(); render(); },
+  delLeftover(date,lane,id){ const src=state.intentions[date]; if(!src||!src[lane]) return;
+    src[lane]=src[lane].filter(x=>x.id!==id); save(); render(); },
   energy(n){ state.journal[today()]=Object.assign({energy:0,mood:"",did:"",felt:""},state.journal[today()],{energy:n,ts:Date.now()}); save(); render(); },
   setJournal(k,v){ state.journal[today()]=Object.assign({energy:0,mood:"",did:"",felt:""},state.journal[today()],{[k]:v,ts:Date.now()}); save(); },
   statMonth(d){ let m=ui.statsM+d, y=ui.statsY; if(m<0){m=11;y--;} if(m>11){m=0;y++;} ui.statsM=m; ui.statsY=y; render(); },
