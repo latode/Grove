@@ -116,6 +116,12 @@ body{background:radial-gradient(125% 70% at 50% 0%, #1F2540 0%, rgba(18,21,33,.5
 .accbtn.on{border-color:var(--text)}
 .nameinput{background:transparent;border:none;color:var(--text);font-family:inherit;font-size:15px;outline:none}
 .lim{min-width:34px;text-align:center;font-size:13px}
+input.lim{background:transparent;border:none;color:var(--text);font-family:ui-monospace,Menlo,monospace;width:38px;outline:none}
+.numin{background:var(--raised);border:1px solid var(--line);border-radius:9px;color:var(--text);font-family:inherit;
+  font-size:13px;width:50px;text-align:center;padding:6px 4px;outline:none}
+.numin:focus{border-color:var(--indigo)}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .resistrow{display:flex;align-items:center;gap:10px;padding:9px 0}
 .resistrow+.resistrow{border-top:1px solid var(--line)}
 .yn{display:flex;gap:6px;margin-left:auto}
@@ -311,9 +317,10 @@ function Today(){
       const w=Math.min(used/it.limit,1)*100;
       viz=`<div class="bar"><div class="barfill" style="width:${w}%;background:${full?"var(--amber)":ac}"></div></div>`;
     }
+    const q1=it.quick1==null?15:it.quick1, q2=it.quick2==null?30:it.quick2;
     const ctrls = it.type==="times"
       ? `<button class="btn${full?" quiet":""}" onclick="App.logOne('${it.id}')">${icon("plus",15)} Log one</button>`
-      : `<button class="btn" onclick="App.addMin('${it.id}',15)">+15</button><button class="btn" onclick="App.addMin('${it.id}',30)">+30</button>`;
+      : [q1,q2].filter(q=>q>0).map(q=>`<button class="btn" onclick="App.addMin('${it.id}',${q})">+${q}</button>`).join("");
     const tbtn = (it.session!=null||it.type==="minutes")
       ? `<button class="btn quiet" onclick="App.startTimer('${it.id}')">${icon("play",14)} ${it.session?it.session+"-min ":""}timer</button>` : "";
     const chips = entries.length
@@ -511,8 +518,17 @@ function SettingsTab(){
           <option value="times" ${it.type==="times"?"selected":""}>times / day</option>
           <option value="minutes" ${it.type==="minutes"?"selected":""}>minutes / day</option>
         </select>
-        <div class="stepper"><button onclick="App.editLimit('${it.id}',-1)">–</button><span class="mono lim">${it.limit}</span><button onclick="App.editLimit('${it.id}',1)">+</button></div>
+        <div class="stepper"><button onclick="App.editLimit('${it.id}',-1)">–</button><input class="lim" type="number" inputmode="numeric" value="${it.limit}" onchange="App.setLimit('${it.id}',this.value)"><button onclick="App.editLimit('${it.id}',1)">+</button></div>
+        <span class="faintc xs">${it.type==="minutes"?"min / day":"× / day"}</span>
         <div class="acc">${accents.map(a=>`<button class="accbtn ${it.accent===a?"on":""}" style="background:${accOf(a)}" onclick="App.editAccent('${it.id}','${a}')"></button>`).join("")}</div>
+      </div>
+      <div class="itemedit">
+        ${it.type==="minutes"?`<span class="faintc xs">quick add</span>
+        <input class="numin" type="number" inputmode="numeric" value="${it.quick1==null?15:it.quick1}" onchange="App.editQuick('${it.id}',1,this.value)">
+        <input class="numin" type="number" inputmode="numeric" value="${it.quick2==null?30:it.quick2}" onchange="App.editQuick('${it.id}',2,this.value)">`:""}
+        <span class="faintc xs">timer</span>
+        <input class="numin" type="number" inputmode="numeric" placeholder="–" value="${it.session==null?"":it.session}" onchange="App.editSession('${it.id}',this.value)">
+        <span class="faintc xs">min</span>
       </div>
       <label class="introw2" style="margin-top:8px;cursor:pointer" onclick="App.editGrows('${it.id}')">
         <span class="cbox sm ${it.growsTree!==false?"on":""}">${it.growsTree!==false?icon("check",12):""}</span>
@@ -622,7 +638,11 @@ const App = {
   statMonth(d){ let m=ui.statsM+d, y=ui.statsY; if(m<0){m=11;y--;} if(m>11){m=0;y++;} ui.statsM=m; ui.statsY=y; render(); },
   editName(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ it.name=v; save(); } },
   editType(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ it.type=v; save(); render(); } },
-  editLimit(id,d){ const it=state.menu.find(m=>m.id===id); if(it){ const step=it.type==="minutes"?5:1; it.limit=Math.max(1,it.limit+d*step); save(); render(); } },
+  editLimit(id,d){ const it=state.menu.find(m=>m.id===id); if(it){ const step=it.type==="minutes"?5:1, min=it.type==="minutes"?0:1;
+    it.limit=Math.max(min, Math.round((it.limit+d*step)/step)*step); save(); render(); } },
+  setLimit(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ let n=parseInt(v,10); if(isNaN(n)) return; it.limit=Math.max(it.type==="minutes"?0:1, n); save(); render(); } },
+  editQuick(id,which,v){ const it=state.menu.find(m=>m.id===id); if(it){ let n=parseInt(v,10); if(isNaN(n)) n=0; it["quick"+which]=Math.max(0,n); save(); render(); } },
+  editSession(id,v){ const it=state.menu.find(m=>m.id===id); if(it){ let n=parseInt(v,10); it.session=(isNaN(n)||n<=0)?null:n; save(); render(); } },
   editAccent(id,a){ const it=state.menu.find(m=>m.id===id); if(it){ it.accent=a; save(); render(); } },
   editGrows(id){ const it=state.menu.find(m=>m.id===id); if(it){ it.growsTree=it.growsTree===false; save(); render(); } },
   addItem(){ state.menu.push({id:uid(),name:"New thing",type:"times",limit:1,session:null,accent:"rose",growsTree:true}); save(); render(); },
