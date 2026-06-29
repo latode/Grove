@@ -1,4 +1,4 @@
-const CACHE = "grove-v11";
+const CACHE = "grove-v12";
 const ASSETS = [
   "./",
   "./index.html",

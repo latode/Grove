@@ -33,6 +33,8 @@ body{background:radial-gradient(125% 70% at 50% 0%, #1F2540 0%, rgba(18,21,33,.5
 .sm{font-size:14px} .xs{font-size:11px} .mt2{margin-top:2px} .mt4{margin-top:4px}
 .mt8{margin-top:8px} .mb12{margin-bottom:12px} .nm{margin-top:2px} .nomb{margin-bottom:0}
 .eyebrow{color:var(--faint);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;margin:0 2px 12px}
+.taphd{display:flex;align-items:center;gap:8px;cursor:pointer}
+.chev{display:inline-flex;transition:transform .2s}
 .stack{display:grid;gap:13px;margin-bottom:24px}
 .stacksm{display:grid;gap:8px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:24px;
@@ -358,6 +360,8 @@ function Today(){
         </div></div>`; }).join("");
   }
 
+  const dipped = state.menu.filter(it=>usedOn(it,day)>0).length;
+  const collapsed = state.menuCollapsed !== false;
   return `
     <header class="hd"><div class="h1">${greet}.</div></header>
     <div class="daynav">
@@ -368,8 +372,6 @@ function Today(){
         :`<button class="iconbtn" onclick="App.viewDay(1)">${icon("chevR",18)}</button>`}
     </div>
     ${isToday?"":`<div class="card pad12" style="margin-bottom:18px"><div class="hint" style="margin:0">Catching up on a past day — anything you log still counts toward that day's tree and your streaks. <span class="link" onclick="App.goToday()">Back to today</span></div></div>`}
-    <div class="eyebrow">What you can dip into</div>
-    <div class="stack">${menu}</div>
     <div class="eyebrow">Today, for sure</div>
     <div class="card">${intsHtml}</div>
     <div class="eyebrow">Catch a thought</div>
@@ -379,6 +381,12 @@ function Today(){
         <button class="btn solid" onclick="App.addCapture()">${icon("plus",16)}</button></div>
       <div class="hint">Park it here, get back to what you were doing. Visit the list in its own time.</div>
     </div>
+    <div class="eyebrow taphd" onclick="App.toggleMenu()">
+      <span>What you can dip into</span>
+      <span class="faintc" style="font-size:10px;letter-spacing:0">${dipped}/${state.menu.length}</span>
+      <span class="chev" style="margin-left:auto;transform:rotate(${collapsed?0:90}deg)">${icon("chevR",14)}</span>
+    </div>
+    ${collapsed?"":`<div class="stack">${menu}</div>`}
     <div class="eyebrow">Rest</div>
     <div class="card naprow">
       <div><div>${naps.length?naps.length+" nap"+(naps.length>1?"s":"")+" today":"No nap yet"}</div>
@@ -589,6 +597,7 @@ const App = {
   viewDay(d){ const nd=addDays(viewedDay(),d); if(nd>today()) return; ui.todayDay=nd; render(); },
   goToday(){ ui.todayDay=today(); render(); },
   bind(k,v){ ui[k]=v; },
+  toggleMenu(){ state.menuCollapsed = (state.menuCollapsed===false); save(); render(); },
   logOne(id){ const it=state.menu.find(m=>m.id===id); state.logs.push({id:uid(),date:viewedDay(),itemId:id,minutes:it.session||0}); save(); render(); },
   addMin(id,min){ state.logs.push({id:uid(),date:viewedDay(),itemId:id,minutes:min}); save(); render(); },
   removeLog(id){ state.logs=state.logs.filter(l=>l.id!==id); save(); render(); },
