@@ -581,12 +581,11 @@ function render(){
   renderNav(); renderTimer();
   if(ui.tab==="today"){ const c=$("capture"); if(c) c.value=ui.captureText||""; }
   if(ui.tab==="plan"){ const p=$("planinput"); if(p) p.value=ui.planText||""; }
-  window.scrollTo(0,0);
 }
 
 /* ---------- App handlers ---------- */
 const App = {
-  go(t){ if(t==="today") ui.todayDay=today(); ui.tab=t; render(); },
+  go(t){ if(t==="today") ui.todayDay=today(); ui.tab=t; render(); window.scrollTo(0,0); },
   viewDay(d){ const nd=addDays(viewedDay(),d); if(nd>today()) return; ui.todayDay=nd; render(); },
   goToday(){ ui.todayDay=today(); render(); },
   bind(k,v){ ui[k]=v; },
